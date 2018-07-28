@@ -171,8 +171,6 @@ makeDraggable state id messages element =
                 draggedElement =
                     element
                         |> Ui.Modifier.conditional ( "being-dragged", stateData.draggedObject == Just id )
-                        |> Dom.Element.addAttribute (VirtualDom.attribute "ondragover" "return false")
-                        |> Dom.Element.addAttribute (onDragEnter messages.dropTargetChanged)
             in
                 case dropTargetExists state of
                     -- There's no drop target, so if the dragged object is dropped, end the drag
@@ -188,12 +186,19 @@ makeDraggable state id messages element =
 -}
 makeDroppable : State a -> a -> Messages msg -> Ui.Element msg -> Ui.Element msg
 makeDroppable state id messages element =
-    case isCurrentDropTarget state id of
-        True ->
+    let
+        droppableElement : Ui.Element msg
+        droppableElement =
             element
-                |> Ui.Modifier.add "drop-target"
-                |> Dom.Element.addAttribute (onDrop messages.dropped)
+                |> Dom.Element.addAttribute (VirtualDom.attribute "ondragover" "return false")
+                |> Dom.Element.addAttribute (onDragEnter messages.dropTargetChanged)
+    in
+        case isCurrentDropTarget state id of
+            True ->
+                droppableElement
+                    |> Ui.Modifier.add "drop-target"
+                    |> Dom.Element.addAttribute (onDrop messages.dropped)
 
-        _ ->
-            -- we'll deal with the general "this could be dropped here" later
-            element
+            _ ->
+                -- we'll deal with the general "this could be dropped here" later
+                droppableElement
