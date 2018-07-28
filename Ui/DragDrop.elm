@@ -3,8 +3,11 @@ module Ui.DragDrop exposing (State, Messages, isCurrentDropTarget, updateDropTar
 {-| This library makes it easy to implement HTML5 drag-and-drop operations with Elm and
 [@danielnarey's Modular Ui framework](https://github.com/danielnarey/elm-modular-ui/).
 
-Ui.Element nodes can be made draggable and droppable, with the state represented by a simple
-format you can embed in the appropriate place in your model.
+Ui.Element nodes can be made draggable and droppable, with the state represented by an opaque object you can store in your model.
+
+Each draggable/droppable element should correspond to some kind of id. This could be an (id for an) item in a list, a tag value from a type representing the various draggable/droppable elements, or whatever you want.
+
+Your application must provide messages for each of the events triggered by this framework. The library provides helper methods to query and update the current state.
 
 
 # State
@@ -14,7 +17,12 @@ format you can embed in the appropriate place in your model.
 
 # Querying State
 
-@docs isCurrentDropTarget, startDragging, stopDragging, updateDropTarget, currentlyDraggedObject, dropTargetExists, initialState
+@docs isCurrentDropTarget, currentlyDraggedObject, dropTargetExists, initialState
+
+
+# Updating State
+
+@docs startDragging, stopDragging, updateDropTarget
 
 
 # Specifying Messages
@@ -56,14 +64,14 @@ type State a
     = State (StateData a)
 
 
-{-| Documentation coming soon
+{-| The initial state on page load, with nothing being dragged or dropped.
 -}
 initialState : State a
 initialState =
     State { draggedObject = Nothing, dropTarget = Ui.DragDrop.State.NoDropTarget }
 
 
-{-| Messages the Ui.DragDrop framework will send to your application as events occur.
+{-| Messages the Ui.DragDrop framework will send to your application as events occur. It is up to your application to call the appropriate Ui.DragDrop update function and store the result in your model.
 -}
 type alias Messages msg =
     { dragStarted : msg
@@ -77,7 +85,7 @@ type alias Messages msg =
 -- STATE MANIPULATION FUNCTIONS
 
 
-{-| Documentation coming soon
+{-| When the dragStarted message is received by your app, call this method to update the state with the newly-dragged object.
 -}
 startDragging : State a -> a -> State a
 startDragging (State stateData) id =
@@ -89,19 +97,14 @@ startDragging (State stateData) id =
         State updatedStateData
 
 
-{-| Documentation coming soon
+{-| When dragging stops because either the dragEnded or dropped message were received or the user has done something else in your application, call this method to update the state appropriately.
 -}
 stopDragging : State a -> State a
 stopDragging (State stateData) =
-    let
-        updatedStateData : StateData a
-        updatedStateData =
-            { stateData | draggedObject = Nothing, dropTarget = NoDropTarget }
-    in
-        State updatedStateData
+    initialState
 
 
-{-| Documentation coming soon
+{-| When the user drags an element over a potential drop zone and the dropTargetChanged message is received by your app, call this method to update the state with the currently targeted drop zone.
 -}
 updateDropTarget : State a -> a -> State a
 updateDropTarget (State stateData) id =
@@ -113,7 +116,7 @@ updateDropTarget (State stateData) id =
         State updatedStateData
 
 
-{-| Documentation coming soon
+{-| This method will tell you whether a given item is currently being hovered over to allow you to provide a visual hint.
 -}
 isCurrentDropTarget : State a -> a -> Bool
 isCurrentDropTarget (State state) id =
@@ -125,14 +128,14 @@ isCurrentDropTarget (State state) id =
             False
 
 
-{-| Documentation coming soon
+{-| This method will tell you whether the dragged element (if any) is currently over a drop zone.
 -}
 dropTargetExists : State a -> Bool
 dropTargetExists (State stateData) =
-    stateData.dropTarget == NoDropTarget
+    stateData.dropTarget /= NoDropTarget
 
 
-{-| Documentation coming soon
+{-| This method will return the currently dragged item (if any). Note that this will return the id (data) that corresponds to the Ui.Element node being dragged, rather than the actual DOM node itself.
 -}
 currentlyDraggedObject : State a -> Maybe a
 currentlyDraggedObject (State stateData) =
@@ -143,7 +146,7 @@ currentlyDraggedObject (State stateData) =
 -- UI FUNCTIONS
 
 
-{-| makeDraggable makes an element draggable, accounting properly for whether it's currently being dragged.
+{-| makeDraggable makes an element draggable. When an element is being dragged, it will gain the "being-dragged" CSS class, with which you can control the display of the moving element.
 -}
 makeDraggable : State a -> a -> Messages msg -> Ui.Element msg -> Ui.Element msg
 makeDraggable state id messages element =
@@ -182,7 +185,7 @@ makeDraggable state id messages element =
                         draggedElement
 
 
-{-| makeDroppable allows the user to drop a dragged element onto another element, accounting properly for whether the dragged object is currently hovering over the droppable.
+{-| makeDroppable marks an element as a place that a dragged object can be dropped onto. If the dragged object is currently hovering over the droppable element, it gains the CSS class "drop-target" to allow for appropriate visual indication.
 -}
 makeDroppable : State a -> a -> Messages msg -> Ui.Element msg -> Ui.Element msg
 makeDroppable state id messages element =
