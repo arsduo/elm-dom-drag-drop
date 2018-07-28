@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "summary": "Drag and Drop utilities for the Modular Ui framework.",
-    "repository": "https://github.com/arsduo/elm-modular-ui-drag-drop.git",
+    "repository": "https://github.com/arsduo/elm-ui-drag-drop.git",
     "license": "BSD3",
     "source-directories": [
         "."
