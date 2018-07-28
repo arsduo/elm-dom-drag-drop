@@ -1,4 +1,4 @@
-module Ui.DragDrop.DragEvents
+module Ui.DragDrop.Events
     exposing
         ( onDragStart
         , onDrag
@@ -9,10 +9,13 @@ module Ui.DragDrop.DragEvents
         , onDrop
         )
 
-{- custom events for Html5 drag and drop
+{-| custom events for Html5 drag and drop
 
-   Courtesy of https://github.com/wintvelt/elm-html5-drag-drop/blob/master/src/DragEvents.elm
-   and https://medium.com/elm-shorts/elm-drag-and-drop-game-630205556d2
+Courtesy of <https://github.com/wintvelt/elm-html5-drag-drop/blob/master/src/DragEvents.elm>
+and <https://medium.com/elm-shorts/elm-drag-and-drop-game-630205556d2>
+
+@docs onDrag onDragEnd onDragEnter onDragLeave onDragOver onDragStart onDrop
+
 -}
 
 import Html.Events exposing (on, onWithOptions)

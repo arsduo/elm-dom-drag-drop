@@ -1,4 +1,4 @@
-module Ui.DragDrop exposing (State, Messages, DropTarget(..), makeDraggable, makeDroppable)
+module Ui.DragDrop exposing (State, Messages, isCurrentDropTarget, updateDropTarget, startDragging, stopDragging, initialState, currentlyDraggedObject, dropTargetExists, makeDraggable, makeDroppable)
 
 {-| This library makes it easy to implement HTML5 drag-and-drop operations with Elm and
 [@danielnarey's Modular Ui framework](https://github.com/danielnarey/elm-modular-ui/).
@@ -9,7 +9,12 @@ format you can embed in the appropriate place in your model.
 
 # State
 
-@docs State, DropTarget
+@docs State
+
+
+# Querying State
+
+@docs isCurrentDropTarget, startDragging, stopDragging, updateDropTarget, currentlyDraggedObject, dropTargetExists, initialState
 
 
 # Specifying Messages
@@ -23,15 +28,19 @@ format you can embed in the appropriate place in your model.
 
 -}
 
+import Ui.DragDrop.State exposing (StateData, DropTarget(..))
+
+
 -- Events
 
-import Ui.DragDrop.DragEvents exposing (onDragStart, onDragEnd, onDrop, onDragEnter, onDragLeave)
+import Ui.DragDrop.Events exposing (onDragStart, onDragEnd, onDrop, onDragEnter, onDragLeave)
 
 
 -- Ui Library
 
 import Ui
 import Ui.Modifier
+import Ui.Attribute
 import Dom.Property
 import Dom.Element
 
@@ -41,29 +50,21 @@ import Dom.Element
 import VirtualDom
 
 
-{-| This type represents a drop target -- something that a dragged element can be dropped upon.
-This can be one of several values:
-
-  - NoDropTarget: the dragged object (if any) is not hovering over a droppable element.
-  - SpecificDropTarget: the dragged object is hovering over an specific element of an equivalent type (e.g. reordering a list).
-
-In the future, this will also support general drop targets (for instance, a trash bin or something
-not like an item in a list).
+{-| An opaque container for state data.
 -}
-type
-    DropTarget a
-    -- Don't show any drop targetting
-    = NoDropTarget
-      -- The target is on an element represented by a specific piece of data
-    | SpecificDropTarget a
-
-{-| The state of the dra}
-type alias State a =
-    { draggedObject : Maybe a
-    , dropTarget : DropTarget a
-    }
+type State a
+    = State (StateData a)
 
 
+{-| Documentation coming soon
+-}
+initialState : State a
+initialState =
+    State { draggedObject = Nothing, dropTarget = Ui.DragDrop.State.NoDropTarget }
+
+
+{-| Messages the Ui.DragDrop framework will send to your application as events occur.
+-}
 type alias Messages msg =
     { dragStarted : msg
     , dropTargetChanged : msg
@@ -72,9 +73,81 @@ type alias Messages msg =
     }
 
 
+
+-- STATE MANIPULATION FUNCTIONS
+
+
+{-| Documentation coming soon
+-}
+startDragging : State a -> a -> State a
+startDragging (State stateData) id =
+    let
+        updatedStateData : StateData a
+        updatedStateData =
+            { stateData | draggedObject = Just id }
+    in
+        State updatedStateData
+
+
+{-| Documentation coming soon
+-}
+stopDragging : State a -> State a
+stopDragging (State stateData) =
+    let
+        updatedStateData : StateData a
+        updatedStateData =
+            { stateData | draggedObject = Nothing, dropTarget = NoDropTarget }
+    in
+        State updatedStateData
+
+
+{-| Documentation coming soon
+-}
+updateDropTarget : State a -> a -> State a
+updateDropTarget (State stateData) id =
+    let
+        updatedStateData : StateData a
+        updatedStateData =
+            { stateData | dropTarget = SpecificDropTarget id }
+    in
+        State updatedStateData
+
+
+{-| Documentation coming soon
+-}
+isCurrentDropTarget : State a -> a -> Bool
+isCurrentDropTarget (State state) id =
+    case ( state.dropTarget, state.dropTarget == SpecificDropTarget id ) of
+        ( SpecificDropTarget _, True ) ->
+            True
+
+        _ ->
+            False
+
+
+{-| Documentation coming soon
+-}
+dropTargetExists : State a -> Bool
+dropTargetExists (State stateData) =
+    stateData.dropTarget == NoDropTarget
+
+
+{-| Documentation coming soon
+-}
+currentlyDraggedObject : State a -> Maybe a
+currentlyDraggedObject (State stateData) =
+    stateData.draggedObject
+
+
+
+-- UI FUNCTIONS
+
+
+{-| makeDraggable makes an element draggable, accounting properly for whether it's currently being dragged.
+-}
 makeDraggable : State a -> a -> Messages msg -> Ui.Element msg -> Ui.Element msg
-makeDraggable state objectForElement messages element =
-    case state.draggedObject of
+makeDraggable state id messages element =
+    case currentlyDraggedObject state of
         -- nothing is being moved currently
         -- so all the elements should be draggable
         Nothing ->
@@ -91,27 +164,32 @@ makeDraggable state objectForElement messages element =
         -- This element is being dragged -- style it appropriately and add appropriate drag and drop events
         Just anObject ->
             let
+                (State stateData) =
+                    state
+
                 draggedElement : Ui.Element msg
                 draggedElement =
                     element
-                        |> Ui.Modifier.conditional ( "being-dragged", state.draggedObject == Just objectForElement )
+                        |> Ui.Modifier.conditional ( "being-dragged", stateData.draggedObject == Just id )
                         |> Dom.Element.addAttribute (VirtualDom.attribute "ondragover" "return false")
                         |> Dom.Element.addAttribute (onDragEnter messages.dropTargetChanged)
             in
-                case state.dropTarget of
+                case dropTargetExists state of
                     -- There's no drop target, so if the dragged object is dropped, end the drag
-                    NoDropTarget ->
+                    True ->
                         draggedElement
                             |> Dom.Element.addAttribute (onDragEnd messages.dragEnded)
 
-                    _ ->
+                    False ->
                         draggedElement
 
 
+{-| makeDroppable allows the user to drop a dragged element onto another element, accounting properly for whether the dragged object is currently hovering over the droppable.
+-}
 makeDroppable : State a -> a -> Messages msg -> Ui.Element msg -> Ui.Element msg
-makeDroppable { dropTarget } objectForElement messages element =
-    case ( dropTarget, dropTarget == SpecificDropTarget objectForElement ) of
-        ( SpecificDropTarget _, True ) ->
+makeDroppable state id messages element =
+    case isCurrentDropTarget state id of
+        True ->
             element
                 |> Ui.Modifier.add "drop-target"
                 |> Dom.Element.addAttribute (onDrop messages.dropped)
