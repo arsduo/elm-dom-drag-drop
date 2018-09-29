@@ -1,13 +1,12 @@
-module Ui.DragDrop.Events
-    exposing
-        ( onDragStart
-        , onDrag
-        , onDragEnd
-        , onDragEnter
-        , onDragOver
-        , onDragLeave
-        , onDrop
-        )
+module Dom.DragDrop.Events exposing
+    ( onDrag
+    , onDragEnd
+    , onDragEnter
+    , onDragLeave
+    , onDragOver
+    , onDragStart
+    , onDrop
+    )
 
 {-| custom events for Html5 drag and drop
 
@@ -18,9 +17,10 @@ and <https://medium.com/elm-shorts/elm-drag-and-drop-game-630205556d2>
 
 -}
 
-import Html.Events exposing (on, onWithOptions)
 import Html exposing (Attribute)
+import Html.Events exposing (on, stopPropagationOn)
 import Json.Decode
+
 
 
 -- when drag of element starts
@@ -91,19 +91,9 @@ onDrop message =
 
 onDragHelper : String -> msg -> Attribute msg
 onDragHelper eventName message =
-    onWithOptions
-        eventName
-        { preventDefault = False
-        , stopPropagation = False
-        }
-        (Json.Decode.succeed message)
+    on eventName (Json.Decode.succeed message)
 
 
 onPreventHelper : String -> msg -> Attribute msg
 onPreventHelper eventName message =
-    onWithOptions
-        eventName
-        { preventDefault = True
-        , stopPropagation = False
-        }
-        (Json.Decode.succeed message)
+    stopPropagationOn eventName (Json.Decode.succeed ( message, True ))

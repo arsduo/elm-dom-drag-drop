@@ -1,4 +1,4 @@
-module Ui.DragDrop.State exposing (StateData, DropTarget(..))
+module Dom.DragDrop.State exposing (StateData, DropTarget(..))
 
 {-| This type represents a drop target -- something that a dragged element can be dropped upon.
 This can be one of several values:
