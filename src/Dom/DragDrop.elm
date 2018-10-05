@@ -79,17 +79,17 @@ Let's take a look at what this looks like for a sample set of types and messages
 
 
     -- we can drop onto an existing element or at the end of the list
-    type DropTargetIdType
+    type DropTarget
         = OntoElement Id
         | EndOfList
 
     type Msg
         = MoveStarted Id
-        | MoveTargetChanged DropTargetIdType
+        | MoveTargetChanged DropTarget
         | MoveCanceled
-        | MoveCompleted Id DropTargetIdType
+        | MoveCompleted Id DropTarget
 
-    dragDropMessages : Dom.DragDrop.Messages Id DropTargetIdType
+    dragDropMessages : Dom.DragDrop.Messages Id DropTarget
     dragDropMessages =
         { dragStarted = MoveStarted
         , dropTargetChanged = MoveTargetChanged

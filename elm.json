@@ -1,9 +1,9 @@
 {
   "type": "package",
-  "name": "arsduo/elm-dom-drag-drop",
+  "name": "arsduo/elm-ui-drag-drop",
   "summary": "Drag and Drop utilities for the elm-dom framework.",
   "license": "BSD-3-Clause",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "exposed-modules": ["Dom.DragDrop"],
   "elm-version": "0.19.0 <= v < 0.20.0",
   "dependencies": {

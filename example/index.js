@@ -16,7 +16,3 @@ document.body.addEventListener("dragover", event => {
   // this is needed in order to make dragging work
   return false;
 });
-
-document.body.addEventListener("drop", event => {
-  console.log("Drop", event);
-});

@@ -28,6 +28,10 @@ songs =
     ]
 
 
+
+{- Users can drop onto either a specific element in the list (taking that spot) or move it to the end of the list. -}
+
+
 type DropTargetIdType
     = OntoElement Id
     | EndOfList
@@ -111,6 +115,11 @@ view model =
             Dom.element "h1"
                 |> Dom.appendText "Dom.DragDrop Demo"
 
+        instructions : Dom.Element Msg
+        instructions =
+            Dom.element "p"
+                |> Dom.appendText "Drag and drop to put these ABBA songs in order!"
+
         dragDropMessages : DragDrop.Messages Msg Id DropTargetIdType
         dragDropMessages =
             { dragStarted = MoveStarted
@@ -161,5 +170,5 @@ view model =
                     )
     in
     Dom.element "div"
-        |> Dom.appendChildList [ header, songList ]
+        |> Dom.appendChildList [ header, instructions, songList ]
         |> Dom.render
