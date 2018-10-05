@@ -1,23 +1,51 @@
 module Stuff exposing (Model, Msg(..), main, update, view)
 
-import Dom.DragDrop
+import Dom.DragDrop as DragDrop
 import Html exposing (Html, button, div, input, span, text)
 import Html.Attributes exposing (style, value)
 import Html.Events exposing (onClick, onInput)
 
 
-type alias Model =
-    { counter : Int, secretField : String, state : Dom.DragDrop.State }
+type Id
+    = Id Int
 
+
+type alias Song =
+    { id : Id
+    , title : String
+    }
+
+
+songs : List Song
+songs =
+    [ { id = 1, title = "Mamma Mia" }
+    , { id = 2, title = "Ring Ring" }
+    , { id = 3, title = "Take a Chance on Me" }
+    , { id = 4, title = "Waterloo" }
+    , { id = 5, title = "Dancing Queen" }
+    , { id = 6, title = "No Hay un Quien Cuplar" }
+    ]
+
+
+type alias Model =
+    { songs : List Song, order : List Id, dragDropState = DragDrop.State Id}
+
+init : Model
+init =
+  {
+    songs = songs
+    , order = songs |> List.map .id
+    , DragDrop.initialState
+  }
 
 main : Program Never Model Msg
 main =
-    Html.beginnerProgram { model = { counter = 0, secretField = "" }, update = update, view = view }
+    Html.beginnerProgram { model = init, update = update, view = view }
 
 
 type Msg
-    = Increment
-    | Decrement
+    = DragStarted Id
+    | DropTargetChanged
     | UpdateSecretField String
 
 
