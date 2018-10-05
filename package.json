@@ -1,0 +1,68 @@
+{
+  "name": "dom-drag-drop",
+  "version": "0.3.0",
+  "description": "Drag and drop library for the elm-dom framework",
+  "scripts": {
+    "build": "babel source --out-dir distribution",
+    "example": "yarn run webpack-dev-server --config example/webpack.config.js --watch",
+    "precommit": "pretty-quick --staged",
+    "test": "jest"
+  },
+  "author": "Alex Koppel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:arsduo/ui-drag-drop.git"
+  },
+  "jest": {
+    "testURL": "http://localhost/",
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
+    "globals": {
+      "environment": "test"
+    },
+    "testMatch": [
+      "**/test/**/(.*)_test.js",
+      "**/test/test.js"
+    ]
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.42",
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.40",
+    "@babel/plugin-transform-async-to-generator": "^7.0.0-beta.40",
+    "@babel/preset-env": "^7.0.0-beta.40",
+    "autoprefixer": "^8.1.0",
+    "babel-core": "^7.0.0-0",
+    "babel-jest": "^22.4.1",
+    "babel-loader": "^8.0.0-beta.2",
+    "css-loader": "^0.28.10",
+    "elm": "0.19",
+    "elm-assets-loader": "^0.3.0",
+    "elm-webpack-loader": "elm-community/elm-webpack-loader#master",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^1.1.11",
+    "html-webpack-plugin": "^3.1.0",
+    "husky": "^0.14.3",
+    "jest": "^22.4.0",
+    "jest-webpack-resolver": "^0.3.0",
+    "json-formatter-js": "^2.2.0",
+    "prettier": "^1.10.2",
+    "pretty-quick": "^1.2.0",
+    "simple-progress-webpack-plugin": "^1.0.4",
+    "url-loader": "^1.0.1",
+    "webpack": "4.19.0",
+    "webpack-cli": "^2.0.10",
+    "webpack-dev-server": "^3.1.1",
+    "webpack-manifest-plugin": "^2.0.0-rc.2",
+    "webpack-merge": "^4.1.2"
+  },
+  "engines": {
+    "node": ">= 6"
+  },
+  "dependencies": {
+    "elm-format": "0.8.0",
+    "elm-upgrade": "^0.19.1"
+  }
+}

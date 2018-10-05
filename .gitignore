@@ -4,3 +4,4 @@ elm-stuff
 repl-temp-*
 # OS X noise
 .DS_Store
+/node_modules
