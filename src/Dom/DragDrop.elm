@@ -63,6 +63,14 @@ initialState =
 
 
 {-| Messages the Dom.DragDrop framework will send to your application as events occur. It is up to your application to call the appropriate Dom.DragDrop update function and store the result in your model.
+
+We track four messages:
+
+  - dragStarted: when the user starts dragging an element
+  - dropTargetChanged: when the dragged element is moved over a droppable element
+  - dragEnded: when the user stops dragging outside a drop-receiving element
+  - dropped: when the user drops a dragged item onto a drop-receiving element
+
 -}
 type alias Messages msg =
     { dragStarted : msg
@@ -151,9 +159,6 @@ makeDraggable state id messages element =
                 -- as such, we have to add it directly via Dom.addAttribute rather than using Dom.addAction
                 -- fortunately, many of the low-level Ui types are aliases to basic Elm types
                 |> Dom.addAttribute (onDragStart messages.dragStarted)
-                -- absurdly, this is needed for Firefox; see https://medium.com/elm-shorts/elm-drag-and-drop-game-630205556d2
-                -- in a future version of Elm this will no longer be allowed and we'll have to use ports 😐
-                |> Dom.addAttribute (VirtualDom.attribute "ondragstart" "event.dataTransfer.setData(\"text/html\", \"blank\")")
 
         -- This element is being dragged -- style it appropriately and add appropriate drag and drop events
         Just anObject ->
@@ -167,13 +172,13 @@ makeDraggable state id messages element =
                         |> Dom.addClassConditional "being-dragged" (stateData.draggedObject == Just id)
             in
             case dropTargetExists state of
-                -- There's no drop target, so if the dragged object is dropped, end the drag
                 True ->
                     draggedElement
-                        |> Dom.addAttribute (onDragEnd messages.dragEnded)
+                        |> Dom.addAttribute (onDragEnd messages.dropped)
 
                 False ->
                     draggedElement
+                        |> Dom.addAttribute (onDragEnd messages.dragEnded)
 
 
 {-| makeDroppable marks an element as a place that a dragged object can be dropped onto. If the dragged object is currently hovering over the droppable element, it gains the CSS class "drop-target" to allow for appropriate visual indication.
@@ -184,15 +189,14 @@ makeDroppable state id messages element =
         droppableElement : Dom.Element msg
         droppableElement =
             element
-                |> Dom.addAttribute (VirtualDom.attribute "ondragover" "return false")
                 |> Dom.addAttribute (onDragEnter messages.dropTargetChanged)
     in
     case isCurrentDropTarget state id of
         True ->
             droppableElement
                 |> Dom.addClass "drop-target"
-                |> Dom.addAttribute (onDrop messages.dropped)
 
+        --  |> Dom.addAttribute (onDrop messages.dropped)
         _ ->
             -- we'll deal with the general "this could be dropped here" later
             droppableElement

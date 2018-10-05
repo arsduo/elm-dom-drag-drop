@@ -82,7 +82,7 @@ onDragLeave message =
 
 onDrop : msg -> Attribute msg
 onDrop message =
-    onPreventHelper "drop" message
+    onDragHelper "drop" message
 
 
 
