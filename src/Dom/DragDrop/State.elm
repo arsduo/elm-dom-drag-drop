@@ -1,4 +1,4 @@
-module Dom.DragDrop.State exposing (StateData, DropTarget(..))
+module Dom.DragDrop.State exposing (DropTarget(..), StateData)
 
 {-| This type represents a drop target -- something that a dragged element can be dropped upon.
 This can be one of several values:
@@ -22,7 +22,7 @@ type
 
 {-| The state of the dragging and dropping.
 -}
-type alias StateData a =
-    { draggedObject : Maybe a
-    , dropTarget : DropTarget a
+type alias StateData draggableIdType dropTargetIdType =
+    { draggedObject : Maybe draggableIdType
+    , dropTarget : DropTarget dropTargetIdType
     }

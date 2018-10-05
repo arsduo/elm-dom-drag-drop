@@ -28,8 +28,13 @@ songs =
     ]
 
 
+type DropTargetIdType
+    = OntoElement Id
+    | EndOfList
+
+
 type alias Model =
-    { songs : List Song, order : List Id, dragDropState : DragDrop.State Id }
+    { songs : List Song, order : List Id, dragDropState : DragDrop.State Id DropTargetIdType }
 
 
 init : Model
@@ -47,9 +52,9 @@ main =
 
 type Msg
     = MoveStarted Id
-    | MoveTargetChanged Id
+    | MoveTargetChanged DropTargetIdType
     | MoveCanceled
-    | MoveCompleted Id
+    | MoveCompleted Id DropTargetIdType
 
 
 update : Msg -> Model -> Model
@@ -64,44 +69,38 @@ update msg model =
         MoveCanceled ->
             { model | dragDropState = DragDrop.stopDragging model.dragDropState }
 
-        MoveCompleted dropTargetId ->
+        MoveCompleted draggedItemId dropTarget ->
             -- we've dropped the dragged element onto the droppable element
             -- so now, let's reorder things!
             let
                 _ =
-                    Debug.log "Dragged, dropped" ( DragDrop.currentlyDraggedObject model.dragDropState, dropTargetId )
+                    Debug.log "Dragged, dropped" ( DragDrop.currentlyDraggedObject model.dragDropState, dropTarget )
 
-                listWithoutDraggedItem : Id -> List Id
-                listWithoutDraggedItem draggedId =
+                listWithoutDraggedItem : List Id
+                listWithoutDraggedItem =
                     model.order
-                        |> List.Extra.remove draggedId
+                        |> List.Extra.remove draggedItemId
                         |> Debug.log "listWithoutDraggedItem"
 
-                splitOnDroppedItem : Id -> ( List Id, List Id )
-                splitOnDroppedItem draggedId =
+                ( beforeDroppedElement, afterDroppedElement ) =
                     let
-                        indexToSplitAt : Int
-                        indexToSplitAt =
-                            List.Extra.elemIndex dropTargetId model.order
+                        indexToSplitAt : Id -> Int
+                        indexToSplitAt id =
+                            List.Extra.elemIndex id model.order
                                 |> Maybe.withDefault 100
                                 -- add one so that the element we just dragged and dropped comes first
-                                |> (+) 1
                                 |> Debug.log "Split index"
                     in
-                    listWithoutDraggedItem draggedId
-                        |> List.Extra.splitAt indexToSplitAt
-                        |> Debug.log "After split"
-            in
-            case DragDrop.currentlyDraggedObject model.dragDropState of
-                Nothing ->
-                    { model | dragDropState = DragDrop.initialState }
+                    case dropTarget of
+                        OntoElement dropTargetId ->
+                            listWithoutDraggedItem
+                                |> List.Extra.splitAt (indexToSplitAt dropTargetId)
+                                |> Debug.log "After split"
 
-                Just aDraggedId ->
-                    let
-                        ( beforeDroppedElement, afterDroppedElement ) =
-                            splitOnDroppedItem aDraggedId
-                    in
-                    { model | order = beforeDroppedElement ++ [ aDraggedId ] ++ afterDroppedElement, dragDropState = DragDrop.initialState }
+                        EndOfList ->
+                            ( listWithoutDraggedItem, [] )
+            in
+            { model | order = beforeDroppedElement ++ [ draggedItemId ] ++ afterDroppedElement, dragDropState = DragDrop.initialState }
 
 
 view : Model -> Html Msg
@@ -112,19 +111,19 @@ view model =
             Dom.element "h1"
                 |> Dom.appendText "Dom.DragDrop Demo"
 
-        dragDropMessages : Song -> DragDrop.Messages Msg
-        dragDropMessages { id } =
-            { dragStarted = MoveStarted id
-            , dropTargetChanged = MoveTargetChanged id
+        dragDropMessages : DragDrop.Messages Msg Id DropTargetIdType
+        dragDropMessages =
+            { dragStarted = MoveStarted
+            , dropTargetChanged = MoveTargetChanged
             , dragEnded = MoveCanceled
-            , dropped = MoveCompleted id
+            , dropped = MoveCompleted
             }
 
         songDisplay : Song -> Dom.Element Msg
         songDisplay song =
-            Dom.element "div"
-                |> DragDrop.makeDraggable model.dragDropState song.id (dragDropMessages song)
-                |> DragDrop.makeDroppable model.dragDropState song.id (dragDropMessages song)
+            Dom.element "li"
+                |> DragDrop.makeDraggable model.dragDropState song.id dragDropMessages
+                |> DragDrop.makeDroppable model.dragDropState (OntoElement song.id) dragDropMessages
                 |> Dom.appendChild
                     (Dom.element "h4" |> Dom.appendText song.title)
                 |> Dom.addClass "song"
@@ -134,13 +133,33 @@ view model =
             List.Extra.elemIndex id model.order
                 |> Maybe.withDefault 100
 
-        songList : List (Dom.Element Msg)
-        songList =
+        songContents : List (Dom.Element Msg)
+        songContents =
             -- should we somehow not have an id in the sort order, put it at the end
             model.songs
                 |> List.sortWith (\id1 id2 -> compare (songIndex id1) (songIndex id2))
                 |> List.map songDisplay
+
+        endOfList : Dom.Element Msg
+        endOfList =
+            Dom.element "li"
+                |> Dom.appendText "⤵️"
+                |> Dom.addClassList [ "end-of-list", "song" ]
+                |> DragDrop.makeDroppable model.dragDropState EndOfList dragDropMessages
+
+        songList : Dom.Element Msg
+        songList =
+            Dom.element "ul"
+                |> Dom.addClass "song-list"
+                |> Dom.appendChildList
+                    (case DragDrop.currentlyDraggedObject model.dragDropState of
+                        Nothing ->
+                            songContents
+
+                        Just _ ->
+                            songContents ++ [ endOfList ]
+                    )
     in
     Dom.element "div"
-        |> Dom.appendChildList (header :: songList)
+        |> Dom.appendChildList [ header, songList ]
         |> Dom.render
