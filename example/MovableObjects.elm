@@ -4,6 +4,7 @@ import Browser
 import Dom
 import Dom.DragDrop as DragDrop
 import Html exposing (Html)
+import Html.Attributes
 import List.Extra
 
 
@@ -38,7 +39,11 @@ type DropTargetIdType
 
 
 type alias Model =
-    { songs : List Song, order : List Id, dragDropState : DragDrop.State Id DropTargetIdType }
+    { songs : List Song
+    , order : List Id
+    , dragDropState : DragDrop.State Id DropTargetIdType
+    , video : Bool
+    }
 
 
 init : Model
@@ -46,6 +51,7 @@ init =
     { songs = songs
     , order = songs |> List.map .id
     , dragDropState = DragDrop.initialState
+    , video = False
     }
 
 
@@ -77,14 +83,10 @@ update msg model =
             -- we've dropped the dragged element onto the droppable element
             -- so now, let's reorder things!
             let
-                _ =
-                    Debug.log "Dragged, dropped" ( DragDrop.currentlyDraggedObject model.dragDropState, dropTarget )
-
                 listWithoutDraggedItem : List Id
                 listWithoutDraggedItem =
                     model.order
                         |> List.Extra.remove draggedItemId
-                        |> Debug.log "listWithoutDraggedItem"
 
                 ( beforeDroppedElement, afterDroppedElement ) =
                     let
@@ -92,19 +94,23 @@ update msg model =
                         indexToSplitAt id =
                             List.Extra.elemIndex id model.order
                                 |> Maybe.withDefault 100
-                                -- add one so that the element we just dragged and dropped comes first
-                                |> Debug.log "Split index"
+
+                        -- add one so that the element we just dragged and dropped comes first
                     in
                     case dropTarget of
                         OntoElement dropTargetId ->
                             listWithoutDraggedItem
                                 |> List.Extra.splitAt (indexToSplitAt dropTargetId)
-                                |> Debug.log "After split"
 
                         EndOfList ->
                             ( listWithoutDraggedItem, [] )
+
+                showVideo : Bool
+                showVideo =
+                    -- surprise!
+                    model.video || (beforeDroppedElement == [] && draggedItemId == Id 6)
             in
-            { model | order = beforeDroppedElement ++ [ draggedItemId ] ++ afterDroppedElement, dragDropState = DragDrop.initialState }
+            { model | order = beforeDroppedElement ++ [ draggedItemId ] ++ afterDroppedElement, dragDropState = DragDrop.initialState, video = showVideo }
 
 
 view : Model -> Html Msg
@@ -112,13 +118,20 @@ view model =
     let
         header : Dom.Element Msg
         header =
-            Dom.element "h1"
-                |> Dom.appendText "Dom.DragDrop Demo"
-
-        instructions : Dom.Element Msg
-        instructions =
-            Dom.element "p"
-                |> Dom.appendText "Drag and drop to put these ABBA songs in order!"
+            Dom.element "div"
+                |> Dom.addClass "hero"
+                |> Dom.appendChild
+                    (Dom.element "div"
+                        |> Dom.addClass "hero-body"
+                        |> Dom.appendChildList
+                            [ Dom.element "div"
+                                |> Dom.addClass "title"
+                                |> Dom.appendText "Dom.DragDrop Demo"
+                            , Dom.element "div"
+                                |> Dom.addClass "subtitle"
+                                |> Dom.appendText "Drag and drop to put these ABBA songs in order!"
+                            ]
+                    )
 
         dragDropMessages : DragDrop.Messages Msg Id DropTargetIdType
         dragDropMessages =
@@ -134,7 +147,10 @@ view model =
                 |> DragDrop.makeDraggable model.dragDropState song.id dragDropMessages
                 |> DragDrop.makeDroppable model.dragDropState (OntoElement song.id) dragDropMessages
                 |> Dom.appendChild
-                    (Dom.element "h4" |> Dom.appendText song.title)
+                    (Dom.element "h4"
+                        |> Dom.appendText song.title
+                        |> Dom.addClass "has-text-centered"
+                    )
                 |> Dom.addClass "song"
 
         songIndex : Song -> Int
@@ -159,7 +175,7 @@ view model =
         songList : Dom.Element Msg
         songList =
             Dom.element "ul"
-                |> Dom.addClass "song-list"
+                |> Dom.addClassList [ "song-list", "column", "is-two-thirds" ]
                 |> Dom.appendChildList
                     (case DragDrop.currentlyDraggedObject model.dragDropState of
                         Nothing ->
@@ -168,7 +184,32 @@ view model =
                         Just _ ->
                             songContents ++ [ endOfList ]
                     )
+
+        abbaImage : Dom.Element Msg
+        abbaImage =
+            case model.video of
+                True ->
+                    Dom.element "iframe"
+                        |> Dom.addAttributeList
+                            [ Html.Attributes.width 492
+                            , Html.Attributes.height 408
+                            , Html.Attributes.src "https://www.youtube.com/embed/6qmzmD4POMk?autoplay=true"
+                            ]
+
+                _ ->
+                    Dom.element "div"
+                        |> Dom.addClass "column"
+                        |> Dom.appendChild
+                            (Dom.element "img"
+                                |> Dom.addAttribute (Html.Attributes.src "abba.png")
+                            )
+
+        content : Dom.Element Msg
+        content =
+            Dom.element "div"
+                |> Dom.addClass "columns"
+                |> Dom.appendChildList [ songList, abbaImage ]
     in
     Dom.element "div"
-        |> Dom.appendChildList [ header, instructions, songList ]
+        |> Dom.appendChildList [ header, content ]
         |> Dom.render

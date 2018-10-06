@@ -5,7 +5,7 @@ This library makes it easy to implement HTML5 drag-and-drop operations with Elm 
 
 ## Data
 
-Each draggable element and element you can drop stuff onto ("drop target") has an identifier. Often, these will be based on  the ID of some record, but don't have to be. Here's an example from the, well, [example](https://github.com/arsduo/ui-drag-drop/tree/master/example/MovableObjects.elm#L30):
+Each draggable element and element you can drop stuff onto ("drop target") has an identifier. Often, these will be based on  the ID of some record, but don't have to be. Here's an example from the, well, [example](https://github.com/arsduo/elm-ui-drag-drop/blob/master/example/MovableObjects.elm#L30):
 
 ```elm
 {- Let's say have a list of records. -}
@@ -37,7 +37,7 @@ type DropTarget =
 ```
 
 All this data gets wrapped up into an opaque object you can store in your model. You learn about
-the current state using various [helper method](https://github.com/arsduo/ui-drag-drop/tree/master/src/Dom/DragDrop.elm):
+the current state using various [helper method](https://github.com/arsduo/elm-ui-drag-drop/blob/master/src/Dom/DragDrop.elm):
 
 ```elm
 model =
@@ -100,6 +100,7 @@ Check out the example to see how this works!
 
 Clone this repo and run `yarn example`. You can then navigate to [http://localhost:8080/example](http://localhost:8080/example) to see Dom.DragDrop in action!
 
+![drag-drop-example](https://user-images.githubusercontent.com/48325/46571871-b2536800-c974-11e8-869e-349f658a8a55.gif)
 
 ## Contributing
 
@@ -111,5 +112,5 @@ When filing an issue, please include a good description of what's happening and 
 
 Please note that this project is released with a Contributor Code of Conduct. By participating in
 this project you agree to abide by its terms. See
-[code-of-conduct.md](https://github.com/arsduo/ui-drag-drop/blob/master/code-of-conduct.md) for more information.
+[code-of-conduct.md](https://github.com/arsduo/elm-ui-drag-drop/blob/master/code-of-conduct.md) for more information.
 
