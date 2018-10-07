@@ -3,6 +3,12 @@
 This library makes it easy to implement HTML5 drag-and-drop operations with Elm and
 [@danielnarey's elm-dom framework](https://github.com/visotype/elm-dom/).
 
+## Example!
+
+Want to see elm-dom-drag-drop in action? Clone this repo and run `yarn example`. You can then navigate to [http://localhost:8080/example](http://localhost:8080/example) to see Dom.DragDrop in action:
+
+![drag-drop-example](https://user-images.githubusercontent.com/48325/46571871-b2536800-c974-11e8-869e-349f658a8a55.gif)
+
 ## Data
 
 Each draggable element and element you can drop stuff onto ("drop target") has an identifier. Often, these will be based on  the ID of some record, but don't have to be. Here's an example from the, well, [example](https://github.com/arsduo/elm-ui-drag-drop/blob/master/example/MovableObjects.elm#L30):
@@ -94,13 +100,6 @@ document.body.addEventListener("dragover", event => {
 });
 ```
 
-## Example!
-
-Check out the example to see how this works!
-
-Clone this repo and run `yarn example`. You can then navigate to [http://localhost:8080/example](http://localhost:8080/example) to see Dom.DragDrop in action!
-
-![drag-drop-example](https://user-images.githubusercontent.com/48325/46571871-b2536800-c974-11e8-869e-349f658a8a55.gif)
 
 ## Contributing
 
