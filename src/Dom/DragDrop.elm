@@ -9,11 +9,15 @@ module Dom.DragDrop exposing
 {-| This library makes it easy to implement HTML5 drag-and-drop operations with Elm and
 [@danielnarey's elm-dom framework](https://github.com/danielnarey/elm-modular-ui/).
 
-Dom.Element nodes can be made draggable and droppable, with the state represented by an opaque object you can store in your model.
+Dom.Element nodes can be made draggable and droppable, with the state represented by an 
+opaque object you can store in your model.
 
-Each draggable/droppable element should correspond to some kind of id. This could be an (id for an) item in a list, a tag value from a type representing the various draggable/droppable elements, or whatever you want.
+Each draggable/droppable element should correspond to some kind of id. This could be an 
+(id for an) item in a list, a tag value from a type representing the various 
+draggable/droppable elements, or whatever you want.
 
-Your application must provide messages for each of the events triggered by this framework. The library provides helper methods to query and update the current state.
+Your application must provide messages for each of the events triggered by this framework. 
+The library provides helper methods to query and update the current state.
 
 
 # State
@@ -62,7 +66,9 @@ initialState =
     State { draggedObject = Nothing, dropTarget = Dom.DragDrop.State.NoDropTarget }
 
 
-{-| Messages the Dom.DragDrop framework will send to your application as events occur. It is up to your application to call the appropriate Dom.DragDrop update function and store the result in your model.
+{-| Messages the Dom.DragDrop framework will send to your application as events occur. 
+It is up to your application to call the appropriate Dom.DragDrop update function and 
+store the result in your model.
 
 We track four messages:
 
@@ -110,7 +116,8 @@ type alias Messages msg draggableIdType dropTargetIdType =
 -- STATE MANIPULATION FUNCTIONS
 
 
-{-| When the dragStarted message is received by your app, call this method to update the state with the newly-dragged object.
+{-| When the dragStarted message is received by your app, call this method to update the 
+state with the newly-dragged object.
 -}
 startDragging : State draggableIdType dropTargetIdType -> draggableIdType -> State draggableIdType dropTargetIdType
 startDragging (State stateData) id =
@@ -122,14 +129,18 @@ startDragging (State stateData) id =
     State updatedStateData
 
 
-{-| When dragging stops because either the dragEnded or dropped message were received or the user has done something else in your application, call this method to update the state appropriately.
+{-| When dragging stops because either the dragEnded or dropped message were received 
+or the user has done something else in your application, call this method to update 
+the state appropriately.
 -}
 stopDragging : State draggableIdType dropTargetIdType -> State draggableIdType dropTargetIdType
 stopDragging (State stateData) =
     initialState
 
 
-{-| When the user drags an element over a potential drop zone and the dropTargetChanged message is received by your app, call this method to update the state with the currently targeted drop zone.
+{-| When the user drags an element over a potential drop zone and the dropTargetChanged 
+message is received by your app, call this method to update the state with the currently
+targeted drop zone.
 -}
 updateDropTarget : State draggableIdType dropTargetIdType -> dropTargetIdType -> State draggableIdType dropTargetIdType
 updateDropTarget (State stateData) id =
@@ -141,7 +152,8 @@ updateDropTarget (State stateData) id =
     State updatedStateData
 
 
-{-| This method will tell you whether a given item is currently being hovered over to allow you to provide a visual hint.
+{-| This method will tell you whether a given item is currently being hovered over to allow 
+you to provide a visual hint.
 -}
 isCurrentDropTarget : State draggableIdType dropTargetIdType -> dropTargetIdType -> Bool
 isCurrentDropTarget (State state) id =
@@ -160,7 +172,9 @@ dropTargetExists (State stateData) =
     stateData.dropTarget /= NoDropTarget
 
 
-{-| This method will return the currently dragged item (if any). Note that this will return the id (data) that corresponds to the Dom.Element node being dragged, rather than the actual DOM node itself.
+{-| This method will return the currently dragged item (if any). Note that this will return 
+the id (data) that corresponds to the Dom.Element node being dragged, rather than the actual 
+DOM node itself.
 -}
 currentlyDraggedObject : State draggableIdType dropTargetIdType -> Maybe draggableIdType
 currentlyDraggedObject (State stateData) =
@@ -171,7 +185,8 @@ currentlyDraggedObject (State stateData) =
 -- UI FUNCTIONS
 
 
-{-| makeDraggable makes an element draggable. When an element is being dragged, it will gain the "being-dragged" CSS class, with which you can control the display of the moving element.
+{-| makeDraggable makes an element draggable. When an element is being dragged, it will gain the \
+"being-dragged" CSS class, with which you can control the display of the moving element.
 -}
 makeDraggable : State draggableIdType dropTargetIdType -> draggableIdType -> Messages msg draggableIdType dropTargetIdType -> Dom.Element msg -> Dom.Element msg
 makeDraggable state draggedElementId messages element =
@@ -207,7 +222,9 @@ makeDraggable state draggedElementId messages element =
                         |> Dom.addAttribute (onDragEnd messages.dragEnded)
 
 
-{-| makeDroppable marks an element as a place that a dragged object can be dropped onto. If the dragged object is currently hovering over the droppable element, it gains the CSS class "drop-target" to allow for appropriate visual indication.
+{-| makeDroppable marks an element as a place that a dragged object can be dropped onto. If 
+the dragged object is currently hovering over the droppable element, it gains the CSS class 
+"drop-target" to allow for appropriate visual indication.
 -}
 makeDroppable : State draggableIdType dropTargetIdType -> dropTargetIdType -> Messages msg draggableIdType dropTargetIdType -> Dom.Element msg -> Dom.Element msg
 makeDroppable state dropTargetId messages element =
