@@ -11,24 +11,24 @@ Want to see elm-dom-drag-drop in action? Clone this repo and run `yarn example`.
 
 ## Data
 
-Each draggable element and element you can drop stuff onto ("drop target") has an identifier. Often, these will be based on  the ID of some record, but don't have to be. Here's an example from the, well, [example](https://github.com/arsduo/elm-ui-drag-drop/blob/master/example/MovableObjects.elm#L30):
+Each draggable element, and element you can drop stuff onto ("drop target"), has an identifier. These will often be based on  the ID of some record, but that doesn't have to be the case. Here's an example from the, well, [example](https://github.com/arsduo/elm-ui-drag-drop/blob/master/example/MovableObjects.elm#L30):
 
 ```elm
-{- Let's say have a list of records. -}
+{- Let's say we have a list of records. -}
 type Id = Id Int
 
-{- These records are the only draggable elements, so we can use their IDs as the draggable identifier type. -}
+{- These records are the only draggable elements existing, so we can use their IDs as the draggable identifier type. -}
 type DraggableId
     = DraggableId Id
 
 
-{- Users can drop onto either a specific element in the list (taking that spot) or move it to the end of the list. -}
+{- Users can drop "elements" onto either a specific element in the list (taking that spot) or move it to the end of the list. -}
 type DropTarget
     = OntoElement Id
     | EndOfList
 ```
 
-If your application had certain hard-coded draggable items, you could imagine draggable type like
+If your application has certain hard-coded draggable items, you could imagine draggable types like
 this:
 
 ```elm
@@ -42,8 +42,8 @@ type DropTarget =
 
 ```
 
-All this data gets wrapped up into an opaque object you can store in your model. You learn about
-the current state using various [helper method](https://github.com/arsduo/elm-ui-drag-drop/blob/master/src/Dom/DragDrop.elm):
+All the data gets wrapped up into an opaque object you can store in your model. You can query
+its current state using various [helper method](https://github.com/arsduo/elm-ui-drag-drop/blob/master/src/Dom/DragDrop.elm):
 
 ```elm
 model =
